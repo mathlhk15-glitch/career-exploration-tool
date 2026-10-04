@@ -1,0 +1,10 @@
+# 참고 자료 — 저장소에 올리지 않음 (CLAUDE.md 「참고 자료」 참고)
+career-exploration-materials-full/
+*.zip
+*.xlsx
+*.pdf
+*.url
+새 텍스트 문서.txt
+
+# Claude Code 개인 설정
+.claude/settings.local.json
