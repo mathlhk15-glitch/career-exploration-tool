@@ -6,5 +6,8 @@ career-exploration-materials-full/
 *.url
 새 텍스트 문서.txt
 
+# 이전 버전 사본 (git 기록에 이미 있음)
+index_old.html
+
 # Claude Code 개인 설정
 .claude/settings.local.json
