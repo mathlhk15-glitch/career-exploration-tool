@@ -821,17 +821,6 @@ function guideText(field, t, g, myQ) {
   return L.join('\n');
 }
 
-function renderTeacherDashboard(){
-  setProgress(1);
-  const rows=[];
-  FIELDS.forEach(f=>f.topics.forEach(t=>{ensureTopicMeta(t);const sl=safetyLevel(t);rows.push({f,t,sl});}));
-  const risky=rows.filter(x=>x.sl[0]!=='🟢');
-  app.innerHTML=`<section class="hero"><h1>교사용 탐구 운영 보기</h1><p>학생에게 어떤 주제가 위험·윤리 확인이 필요한지 빠르게 점검하는 화면입니다. 학생용 사례와 주제는 그대로 유지됩니다.</p><div class="row"><a class="btn" href="${location.pathname}${location.hash||''}">학생 화면으로 돌아가기</a></div></section>
-  <section class="card"><h2>운영 요약</h2><p class="lead">전체 상세 주제 <b>${rows.length}개</b> · 교사 확인/지도 권장 <b>${risky.length}개</b> · 사람 대상 탐구 <b>${rows.filter(x=>isPeopleTopic(x.t)).length}개</b></p>
-  <div class="case-tools"><input id="teacherSearch" type="search" placeholder="주제·분야·준비물 검색"><label><input id="teacherRisk" type="checkbox" checked> 확인 필요한 주제만</label></div><div id="teacherList"></div></section>`;
-  const draw=()=>{const q=norm(document.getElementById('teacherSearch').value);const only=document.getElementById('teacherRisk').checked;const list=rows.filter(x=>(!only||x.sl[0]!=='🟢')&&(!q||norm(x.f.name+x.t.title+x.t.tools+x.t.approval).includes(q)));document.getElementById('teacherList').innerHTML=list.map(x=>`<div class="box mt-s"><div class="tags"><span class="tag">${x.sl[0]} ${esc(x.sl[1])}</span>${isPeopleTopic(x.t)?'<span class="tag">🙋 사람 대상</span>':''}<span class="tag">${'★'.repeat(x.t.difficulty)}${'☆'.repeat(3-x.t.difficulty)}</span></div><b>${esc(x.f.name)} · ${esc(x.t.title)}</b><p class="hint">준비물: ${esc(x.t.tools)} · 시간: ${esc(x.t.time)} · 교사 확인: ${esc(x.t.approval)}</p><p>${esc((x.t.safety||[]).join(' / ')||'일반 안전수칙 준수')}</p><p class="hint">관찰 포인트: 질문 구체화 → 직접 자료 수집 → 결과의 근거·한계 → 후속 탐구 연결</p></div>`).join('')||'<p>조건에 맞는 주제가 없습니다.</p>';};
-  document.getElementById('teacherSearch').addEventListener('input',draw);document.getElementById('teacherRisk').addEventListener('change',draw);draw();
-}
 function showResume(){
   const items=savedProgressItems();
   if(!items.length){toast('저장된 진행 기록이 없어요');return;}
