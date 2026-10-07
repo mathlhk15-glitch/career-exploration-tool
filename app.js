@@ -1,4 +1,4 @@
-// 진로 탐구 길잡이 v2.4 - 화면·검색·저장·인쇄 로직
+// 진로 탐구 길잡이 v2.5 - 화면·검색·저장·인쇄 로직
 /* 목록에 없는 진로를 위한 범용 탐구 틀 */
 function buildGenericField(c) {
   const field = {
@@ -726,10 +726,10 @@ function renderGuide(s, field, t) {
   });
   const resetAll = app.querySelector('[data-resetall]');
   if (resetAll) resetAll.addEventListener('click', () => {
-    if (!confirm('이 기기에 저장된 모든 탐구 질문과 체크 기록을 지울까요?')) return;
+    if (!confirm('진로 탐구 길잡이에 저장된 질문과 체크만 지울까요? 공통 내 탐구노트는 남아 있습니다.')) return;
     clearAllMyRecords();
     render();
-    toast('모든 탐구 기록을 지웠어요');
+    toast('진로 탐구 길잡이 기록을 지웠어요');
   });
   app.querySelector('[data-copyall]').addEventListener('click', () => copyText(guideText(field, t, g, myQ.value)));
   app.querySelector('[data-plan]').addEventListener('click', () => printOnePagePlan(field, t, g, myQ.value));
@@ -884,7 +884,7 @@ document.addEventListener('click', e => {
   else if (d.jump) document.getElementById(d.jump).scrollIntoView({ behavior: 'smooth', block: 'start' });
   else if (d.copy) copyText(d.copy);
   else if ('resume' in d) showResume();
-  else if ('resetallglobal' in d) { if(confirm('이 기기에 저장된 모든 탐구 기록을 지울까요?')){clearAllMyRecords();toast('모든 탐구 기록을 지웠어요');} }
+  else if ('resetallglobal' in d) { if(confirm('진로 탐구 길잡이에 저장된 기록만 지울까요? 공통 내 탐구노트는 남아 있습니다.')){clearAllMyRecords();toast('진로 탐구 길잡이 기록을 지웠어요');} }
   else if ('print' in d) window.print();
 });
 

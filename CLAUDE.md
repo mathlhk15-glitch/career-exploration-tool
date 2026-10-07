@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 창원경일고 학생이 희망 진로·관심 분야에서 출발해 탐구 주제 → 질문 → 조사·자료 → 활동 → 결과 정리 → 보고서·발표 → 후속 탐구를 스스로 설계하도록 돕는 웹도구. AI가 탐구를 대신 완성하는 도구가 아니라 선택·질문·검증을 돕는 코치다. 기능 수보다 정확성, 자기주도성, 사용 편의성, 개인정보 보호를 우선한다. UI 작업 전에는 `DESIGN.md`, 변경 이력은 `README.md`를 먼저 읽는다.
 
 ## 변하지 않는 원칙
-- **정적 파일 4개로 동작**: `index.html`(화면·CSS) → `data.js` → `cases.js` → `app.js` 순서로 `<script src>` 로드. 빌드·패키지·테스트 도구 없음. 외부 CDN·스크립트·폰트·API를 쓰지 않는다(폴더째 열어도 오프라인에서 동작해야 함). 꼭 필요하면 승인 후 로컬 파일로 넣는다.
-- **교내 진학 상담용.** 「모두의 학과별 탐구 지도」 사례는 "수록 자료의 저작권은 각 대학, 교내 진학 상담 목적으로만 이용" 조건이다. GitHub 저장소는 **비공개(private)**로 두고 **GitHub Pages는 켜지 않는다**(Pages 사이트는 누구나 볼 수 있다). 배포는 교내 PC·학교 공유 드라이브에 폴더째 둔다. 공개 배포 제안이 나오면 먼저 사용자에게 확인한다.
+- **정적 파일 4개로 동작**: `index.html`(화면·CSS) → `data.js` → `cases.js` → `app.js` 순서로 `<script src>` 로드. 빌드·패키지·테스트 도구 없음. 외부 CDN·스크립트·폰트·API를 쓰지 않는다(공통 파일 `inquiry-standard.js`·`inquiry-notes.js`·`kyungil-link.js`는 저장소 안 로컬 파일)(폴더째 열어도 오프라인에서 동작해야 함). 꼭 필요하면 승인 후 로컬 파일로 넣는다.
+- **공개 배포(v2.5~).** 「모두의 학과별 탐구 지도」 사례 공개 사용 허가를 확보했다는 운영자 판단에 따라 GitHub Pages로 공개한다. 사례 출처·검증 수준·“합격 공식 아님” 안내는 유지한다.
 - **개인정보 수집 금지.** 이름·학번·연락처·성적·건강정보·생기부·상담 원문 입력칸을 만들지 않고, 예시도 가명·공개 자료만 쓴다. 입력값은 외부로 보내지 않는다. `localStorage`(`cet-v2:` 키, 주제별)에는 체크 상태, 학생이 쓴 탐구 질문·활동 메모, 참고문헌(최대 5개), `meta.ts`(진행 중 목록용)만 저장한다.
 - **기존 기능·파일을 지우거나 옮기지 않는다**(필요하면 승인 먼저). 영향 범위가 크면 계획부터 제시한다. 역할을 확인하지 못한 파일은 [추정]으로 표시한다.
 
 ## Git·GitHub
-- 원격: `https://github.com/mathlhk15-glitch/career-exploration-tool` (private, 브랜치 `main`). 커밋·푸시는 사용자가 요청할 때만 하고, 수정 후 `git diff`로 실제 변경점을 확인한다.
+- 원격: `https://github.com/mathlhk15-glitch/career-exploration-tool` (public + GitHub Pages, 브랜치 `main`). 커밋·푸시는 사용자가 요청할 때만 하고, 수정 후 `git diff`로 실제 변경점을 확인한다.
 - 커밋 대상: `index.html`, `data.js`, `cases.js`, `app.js`, `README.md`, `CLAUDE.md`, `DESIGN.md`, `.gitignore`, `.claude/launch.json`. 참고 자료와 `index_old.html`(v0.3 사본, git 기록에 있음)은 `.gitignore`로 제외.
 
 ## 실행·확인
@@ -50,3 +50,9 @@ python -m http.server 8123 --bind 127.0.0.1
 - `career-exploration-materials-full/` — 365건 통계 분석, 계열×결 매트릭스, AI 추가 사례 120건(CSV), 탐구 설계 기본가이드.
 - `모두의 학과별 탐구 지도.url` — https://park-sanggeun-all.github.io/teacher-console-map/ (사례 원본; 페이지 인라인 `const DATA = {rows:[...]}`).
 - `student_growth_roadmap-main.zip`(선생님의 기존 플랫폼; `growth-standards.js`. 출처 기경민 교사), `arts-inquiry-guide-main.zip`(예체능 탐구 가이드).
+
+## 경일 진로·탐구 성장 시스템 (v2.5~)
+- 로드 순서: `data.js → cases.js → app.js → inquiry-standard.js → inquiry-notes.js → kyungil-link.js`.
+- `inquiry-standard.js`·`inquiry-notes.js`는 growth-hub 원본의 복사본이다. 여기서 직접 고치지 말고 원본을 고친 뒤 네 저장소에 같은 파일을 넣는다.
+- `kyungil-link.js`는 `readState`·`getField`·`storageKey`·`search`·`GRADES`를 읽기만 한다. 이 이름을 바꾸면 연결 코드도 함께 고친다.
+- 공통 탐구노트 키: `kyungil.inquiryNotes.v1`(목록), `kyungil.activeNote`(sessionStorage, 지금 이어 쓰는 노트).
