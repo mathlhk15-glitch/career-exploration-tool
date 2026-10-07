@@ -7,7 +7,7 @@
   var K = window.KIS, N = window.KNotes;
   if (!K || !N || typeof readState !== 'function') return;
   var S = K.SITES, e2 = K.esc;
-  K.mountNav('topic', document.querySelector('header.top'));
+  K.mountNav('start', document.querySelector('header.top'));
   N.migrate();
 
   var css = document.createElement('style');
@@ -18,7 +18,7 @@
   function el(html) { var d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild; }
   function syncHubIntro(s) {
     var hi = document.getElementById('kisHubIntro');
-    var show = !s.g && location.search.indexOf('teacher=1') < 0;
+    var show = !s.g;
     if (!show) { if (hi) hi.remove(); return; }
     if (!hi) {
       hi = el('<section class="kis-hubintro no-print" id="kisHubIntro"><b>🧭 주제·과목·탐구 방법을 깊게 찾는 곳이에요.</b> <a href="' + S.hub + 'index.html">처음이면 통합 허브에서 시작하기 →</a></section>');

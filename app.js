@@ -641,8 +641,8 @@ function renderGuide(s, field, t) {
         <label><b>4. 성장·확장</b><textarea data-record="growth" rows="2" placeholder="새로 배운 점 + 다음 과목·후속 탐구"></textarea></label>
       </div>
       <div class="print-only box" id="recordPrint"></div>
-      <button class="btn small no-print" type="button" data-recordcopy>📋 교사 제출용 활동 요약 복사</button>
-      <p class="hint mt">※ 생활기록부 문장을 학생이 대신 작성하는 기능이 아니라, 선생님께 자신의 실제 활동과 근거를 정확히 설명하기 위한 <b>학생 활동 요약</b>입니다.</p>
+      <button class="btn small no-print" type="button" data-recordcopy>📋 자기평가서용 활동 정리 복사</button>
+      <p class="hint mt">※ 생활기록부 문장을 학생이 대신 작성하는 기능이 아니라, 내가 실제로 한 활동과 근거를 자기평가서에 정확히 옮기기 위한 <b>학생 활동 정리</b>입니다.</p>
       <h3>생성형 AI를 썼다면 기록해요</h3>
       <div class="box"><p>사용한 도구 / 사용 목적 / 내가 확인한 원자료 / AI 답변 중 수정·버린 내용 / 최종 문장을 내가 어떻게 다시 썼는지 간단히 남기세요.</p></div>
       <h3>그래프 해석 문장 틀</h3>
@@ -737,7 +737,7 @@ function renderGuide(s, field, t) {
   if(recordBtn) recordBtn.addEventListener('click',()=>{
     const r={}; app.querySelectorAll('[data-record]').forEach(x=>r[x.dataset.record]=x.value.trim());
     const subs=t.subjects.join(', ');
-    copyText(`[교과 세특·창체 연계 탐구 활동 요약]
+    copyText(`[탐구활동 자기평가서용 활동 정리]
 1. 탐구 주제: ${t.title}
 2. 연계 과목: ${subs}
 3. 탐구 질문: ${myQ.value.trim() || '(직접 작성)'}
@@ -843,7 +843,7 @@ function showResume(){
 }
 
 function render() {
-  if (new URLSearchParams(location.search).get('teacher') === '1') { renderTeacherDashboard(); return; }
+  /* 학생용 단일 화면: 교사용 대시보드는 사용하지 않습니다. */
   const s = readState();
   let field, topic;
   if (!s.g) renderHome();
