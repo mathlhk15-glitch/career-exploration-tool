@@ -21,7 +21,7 @@ python -m http.server 8123 --bind 127.0.0.1
 ```
 `.claude/launch.json`의 `career-tool` 설정과 같다(브라우저 패널 `preview_start`). 테스트 프레임워크는 없고 브라우저 콘솔에서 확인한다(화면이 무거우니 `go()` 뒤 200ms 이상 기다린 후 DOM을 확인).
 - 데이터: 주제 id 중복 없음, 모든 주제의 `questions` 3개·`KYEOL`/`METHODS` 키 유효, 학년별 `gradeSubjects(t.subjects, g)[0][1]`이 비지 않음, 2015 개정 과목명 없음.
-- 화면: `go({g, f, t})`로 모든 분야×학년×주제, 범용 진로(`f=gen`), 교사용(`?teacher=1`), 진행 중 목록·뒤로가기·새로고침·localStorage, 인쇄, 375px 모바일(가로 스크롤 없음, 누르는 요소 44px).
+- 화면: `go({g, f, t})`로 모든 분야×학년×주제, 범용 진로(`f=gen`), 진행 중 목록·뒤로가기·새로고침·localStorage, 인쇄, 375px 모바일(가로 스크롤 없음, 누르는 요소 44px).
 - `sources`를 추가·수정했다면 그 링크가 열리는지 확인한다.
 - 보고할 때는 변경 파일과 이유, 실제로 확인한 것과 확인하지 못한 것을 구분해 적는다.
 
@@ -31,7 +31,7 @@ python -m http.server 8123 --bind 127.0.0.1
   - 공통: `GRADES`, `KYEOL`(결 5가지 exp/data/soc/lit/cmp), `METHODS`, 질문 틀·체크리스트, `CLUSTERS`(7계열 → 분야 id).
   - `FIELDS`(15개 분야, 주제 객체 `id, title, kyeol, methods[], grades[], link, questions[3], research, steps, safety?, subjects, keywords, next` + 선택 `difficulty, time, tools, approval, output`). 뒤쪽에서 주제가 덧붙는다: `EXTRA_TOPICS`, `pushTopic()`(제목 중복이면 건너뜀), `ATTACHMENT_TOPIC_IDEAS` → `compactTopic()`(짧은 아이디어를 주제 객체로 생성), `DISPLAY_TITLE_FIXES`, `FIELD_KEYWORD_ADD`, 마지막에 방법·본문 단어로 안전 문구를 자동 추가하는 루프.
 - **`cases.js`** — `MAP_CASES`(탐구 지도 365건 원문: `[주제, 대학, 학년도, 쪽, 학과, 계열, 교과, 결, 학과연결근거, 분야ids]`), `AI_CASES`(AI 추가 사례 120건). 끝의 `cleanCaseData()`가 실행 시 제어문자 제거·문장 조각 제외(현재 353건)·분야 보정을 한다.
-- **`app.js`** — `buildGenericField`(범용 진로), `ensureTopicMeta`(최소/표준/심화 기준 기본값), `safetyLevel`, 해시 라우팅(`#g=학년&f=분야&t=주제&k=입력진로&m=1`) `readState`/`go` → `render()` → `renderHome / renderCareer / renderChoose / renderTopics / renderGuide`, `?teacher=1`이면 `renderTeacherDashboard`. 과목 표시는 `nationalSubjectBlock`(전체 교육과정 + 우리 학교 개설 강조)과 `subjectBlock`(편제 기준, 접어 둠). 사례 패널 `casePanel`/`bindCasePanel`, `NEXT_KYEOL`. `search()`는 "…교사"면 선택 화면, 그 외 `matchFields` 1등이 단독일 때만 바로 이동.
+- **`app.js`** — `buildGenericField`(범용 진로), `ensureTopicMeta`(최소/표준/심화 기준 기본값), `safetyLevel`, 해시 라우팅(`#g=학년&f=분야&t=주제&k=입력진로&m=1`) `readState`/`go` → `render()` → `renderHome / renderCareer / renderChoose / renderTopics / renderGuide`. 과목 표시는 `nationalSubjectBlock`(전체 교육과정 + 우리 학교 개설 강조)과 `subjectBlock`(편제 기준, 접어 둠). 사례 패널 `casePanel`/`bindCasePanel`, `NEXT_KYEOL`. `search()`는 "…교사"면 선택 화면, 그 외 `matchFields` 1등이 단독일 때만 바로 이동.
 
 ## 수정 규칙
 - 동적 문자열(특히 학생 입력 `k`)은 HTML에 넣기 전에 `esc()`를 거친다.
