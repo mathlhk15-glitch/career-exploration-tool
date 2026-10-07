@@ -53,6 +53,6 @@ python -m http.server 8123 --bind 127.0.0.1
 
 ## 경일 진로·탐구 성장 시스템 (v2.5~)
 - 로드 순서: `data.js → cases.js → app.js → inquiry-standard.js → inquiry-notes.js → kyungil-link.js`.
-- `inquiry-standard.js`·`inquiry-notes.js`는 growth-hub 원본의 복사본이다. 여기서 직접 고치지 말고 원본을 고친 뒤 네 저장소에 같은 파일을 넣는다.
+- `inquiry-standard.js`·`inquiry-notes.js`는 gyeongil-growth-hub 원본의 복사본이다. 여기서 직접 고치지 말고 원본을 고친 뒤 네 저장소에 같은 파일을 넣는다.
 - `kyungil-link.js`는 `readState`·`getField`·`storageKey`·`search`·`GRADES`를 읽기만 한다. 이 이름을 바꾸면 연결 코드도 함께 고친다.
 - 공통 탐구노트 키: `kyungil.inquiryNotes.v1`(목록), `kyungil.activeNote`(sessionStorage, 지금 이어 쓰는 노트).

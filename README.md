@@ -32,7 +32,7 @@
 - 「모두의 학과별 탐구 지도」 사례의 공개 사용 허가를 확보했다는 운영자 판단에 따라, v2.5부터 **GitHub Pages로 공개 배포**합니다.
 - 주소: `https://mathlhk15-glitch.github.io/career-exploration-tool/`
 - 저장소를 public으로 바꾸고 **Settings → Pages → Branch `main` / `(root)`** 를 켭니다.
-- 다른 세 저장소(`growth-hub`, `career-lab`, `seteuk-guide`)와 같은 `mathlhk15-glitch.github.io` 아래에 있어야 내 탐구노트를 함께 씁니다.
+- 다른 세 저장소(`gyeongil-growth-hub`, `career-lab`, `seteuk-guide`)와 같은 `mathlhk15-glitch.github.io` 아래에 있어야 내 탐구노트를 함께 씁니다.
 - 화면의 사례 출처 표시와 “합격 공식 아님” 안내는 그대로 유지합니다.
 
 ## 교사용 보기
@@ -52,7 +52,7 @@
 
 ## v2.5 경일 진로·탐구 성장 시스템 연결
 - 역할: 🧭 **전문 탐구 설계실**. 진로 실험실(발견)에서 찾은 관심을 분야·주제·과목·질문·방법으로 구체화합니다.
-- `inquiry-standard.js`·`inquiry-notes.js`: 공통 기준과 공통 탐구노트의 복사본(원본은 growth-hub). 첫 줄 버전이 네 저장소에서 같아야 합니다.
+- `inquiry-standard.js`·`inquiry-notes.js`: 공통 기준과 공통 탐구노트의 복사본(원본은 gyeongil-growth-hub). 첫 줄 버전이 네 저장소에서 같아야 합니다.
 - `kyungil-link.js`: 이 저장소 전용 연결 코드. `app.js`가 그린 화면에 덧붙이기만 하고 기존 함수는 바꾸지 않습니다.
   - 모든 화면 위 공통 메뉴
   - 처음 화면·진로 입력 화면: 진로 실험실에서 고른 진로가 있으면 “○○로 주제 찾기” 카드
