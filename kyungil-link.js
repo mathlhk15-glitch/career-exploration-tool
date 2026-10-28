@@ -1,4 +1,5 @@
-/* v2.8 진로 탐구 길잡이 ↔ 경일 진로·탐구 성장 시스템 연결
+/* v2.9 진로 탐구 길잡이 ↔ 경일 진로·탐구 성장 시스템 연결
+ * v2.9: 막힐 때 탐구 도움서 앵커 8개(공통 기준 HELP)를 단계 카드에 연결, 실험실 연결은 '학교 안 미니 실험'으로 문구 구분
  * app.js가 그린 화면을 바꾸지 않고, 화면이 그려진 뒤 공통 메뉴·진로 실험실 결과·“탐구노트에 담기” 카드를 덧붙입니다.
  * app.js의 전역 함수 readState·getField·storageKey·esc·toast를 읽기만 합니다.
  */
@@ -11,7 +12,7 @@
   N.migrate();
 
   var css = document.createElement('style');
-  css.textContent = '.kis-hubintro{box-sizing:border-box;max-width:780px;border:1px solid var(--line);border-left:4px solid var(--primary);background:var(--surface);border-radius:14px;padding:12px 16px;margin:16px auto}.kis-hubintro p{margin:.25em 0}.kis-hubintro a{font-weight:800}' + '.kis-card{border-left:4px solid var(--primary)}.kis-card .kis-links{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}.kis-lab{border-left:4px solid var(--accent)}';
+  css.textContent = '.kis-hubintro{box-sizing:border-box;max-width:780px;border:1px solid var(--line);border-left:4px solid var(--primary);background:var(--surface);border-radius:14px;padding:12px 16px;margin:16px auto}.kis-hubintro p{margin:.25em 0}.kis-hubintro a{font-weight:800}' + '.kis-card{border-left:4px solid var(--primary)}.kis-card .kis-links{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px}.kis-links a{min-height:44px;display:inline-flex;align-items:center}.kis-help{margin:8px 0}.kis-help summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700}.kis-lab{border-left:4px solid var(--accent)}';
   document.head.appendChild(css);
 
   var app = document.getElementById('app');
@@ -46,7 +47,9 @@
       '<div class="row"><button class="btn" type="button" id="kisSave">' + (linked ? '탐구노트 업데이트' : '탐구노트에 담기') + '</button>' +
       (linked ? '<a class="btn ghost" href="' + S.hub + 'notes.html#' + encodeURIComponent(linked.id) + '">탐구노트 열기</a>' : '') + '</div>' +
       '<p class="hint" id="kisMsg" role="status"></p>' +
-      '<p class="kis-links"><a href="' + S.guide + '#question">🛟 질문이 너무 쉬운 것 같아요</a><a href="' + S.guide + '#evidence">🛟 자료를 믿어도 될까요?</a><a id="kisLabContinue" href="' + S.lab + 'inquiry.html' + (linked ? '?note=' + encodeURIComponent(linked.id) : '') + '">🔬 진로 실험실에서 설계안 쓰기</a></p></section>');
+      '<details class="kis-help"><summary>🛟 막히면 탐구 도움서에서 바로 찾기</summary><p class="kis-links">' +
+        (K.HELP || []).map(function (h) { return '<a href="' + S.guide + '#' + encodeURIComponent(h.id) + '">' + e2(h.label) + '</a>'; }).join('') + '</p></details>' +
+      '<p class="kis-links"><a id="kisLabContinue" href="' + S.lab + 'inquiry.html' + (linked ? '?note=' + encodeURIComponent(linked.id) : '') + '">🔬 학교 안 미니 실험으로 먼저 해 보기 (진로 실험실)</a></p></section>');
     card.querySelector('#kisSave').addEventListener('click', function () {
       var q = (document.getElementById('myQ') || {}).value || '';
       if (!q.trim()) q = t.questions[Math.min(Number(s.g) - 1, t.questions.length - 1)] || t.questions[0];

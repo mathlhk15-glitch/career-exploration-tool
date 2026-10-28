@@ -1,4 +1,4 @@
-// 진로 탐구 길잡이 v2.8 - 화면·검색·저장·인쇄 로직
+// 진로 탐구 길잡이 v2.9 - 화면·검색·저장·인쇄 로직
 /* 목록에 없는 진로를 위한 범용 탐구 틀 */
 function buildGenericField(c) {
   const field = {
@@ -271,6 +271,7 @@ function aiCaseItem(a) {
 }
 
 // 원문 셀을 절대 변경하지 않고 화면에서만 서식화합니다.
+// 가이드북 원문 셀 표시용(1인자). 계획서 복사용 guideText(field,t,g,myQ)와 다른 함수입니다.
 function guideCellText(v){ return esc(String(v == null ? '' : v)); }
 function universityKey(name){return norm(String(name||'').replace(/한국외국어대학교?|한국외대/g,'한국외대').replace(/한양대\s*\(?\s*에리카\s*\)?|한양대\s*\(?\s*ERICA\s*\)?/gi,'한양대ERICA'));}
 function guideSearchText(c){ return c.raw.join(' '); }
@@ -387,8 +388,11 @@ function bindCasePanel(field,k){
  const original=c.raw[8];const textarea=b.closest('.guide-start-box')?.querySelector('textarea');const question=textarea?.value.trim()||'';
  if(!question){toast('자신만의 탐구 질문을 먼저 입력해 주세요.');textarea?.focus();return;}
  if(!window.KNotes||typeof window.KNotes.create!=='function'){toast('탐구노트 모듈을 불러오지 못했습니다.');return;}
- try{const n=window.KNotes.create({title:question,topic:original,question:question,interest:c.raw[4],field:field.generic?'':field.id,subject:c.raw[12],concept:c.raw[13],method:c.raw[14],start:{from:'guidebook',text:'참고 사례 '+c.raw[0]+' / '+c.raw[2]+' / '+c.raw[1]+'학년도 / '+original},stage:'start',links:{explore:'guidebook-'+c.raw[0]}},'explore');
- window.KNotes.setActive(n.id);toast('탐구노트에 저장했습니다. 성장 허브의 현재 탐구에서 이어갈 수 있어요.');}
+ try{const N=window.KNotes,key='guidebook-'+c.raw[0];
+ // 같은 사례로 만든 노트가 있으면 새로 만들지 않고 이어 씁니다(v2.9).
+ const prev=typeof N.findBy==='function'?N.findBy(x=>x.links&&x.links.explore===key):null;
+ const n=prev?N.merge(prev.id,{title:question,question:question}):N.create({title:question,topic:original,question:question,interest:c.raw[4],field:field.generic?'':field.id,subject:c.raw[12],concept:c.raw[13],method:c.raw[14],start:{from:'guidebook',text:'참고 사례 '+c.raw[0]+' / '+c.raw[2]+' / '+c.raw[1]+'학년도 / '+original},stage:'start',links:{explore:key}},'explore');
+ N.setActive(n.id);toast(prev?'이 사례로 만든 탐구노트에 새 질문을 이어 썼어요. 노트를 새로 만들지 않았어요.':'탐구노트에 저장했습니다. 성장 허브의 현재 탐구에서 이어갈 수 있어요.');}
  catch(err){toast('탐구노트를 저장할 수 없습니다. 브라우저의 저장 공간과 모드를 확인하세요.');}
  });draw();drawBooks();
 }
@@ -797,7 +801,7 @@ function renderGuide(s, field, t) {
     render();
     toast('진로 탐구 길잡이 기록을 지웠어요');
   });
-  app.querySelector('[data-copyall]').addEventListener('click', () => copyText(guideCellText(field, t, g, myQ.value)));
+  app.querySelector('[data-copyall]').addEventListener('click', () => copyText(guideText(field, t, g, myQ.value)));
   app.querySelector('[data-plan]').addEventListener('click', () => printOnePagePlan(field, t, g, myQ.value));
   const recordBtn=app.querySelector('[data-recordcopy]');
   if(recordBtn) recordBtn.addEventListener('click',()=>{

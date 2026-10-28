@@ -1,12 +1,20 @@
-## v2.8 추가 변경 이력 (2026-10-28)
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## 변경 이력
+### v2.9 (2026-10-28) 경일 진로·탐구 시스템 통합 정리
+- **핫픽스(2026-10-28)**: 가이드북 셀 출력 함수와 탐구 계획 텍스트 함수의 이름이 같아(`guideText`) 분야·주제 화면이 멈추거나 사례 목록이 비던 문제(v2.6~2.8) → 셀 출력용을 `guideCellText`로 분리. 기존 데이터·저장 키·화면 구조는 유지.
+- **핫픽스 보완**: 위 변경 때 「계획 전체 복사」 버튼까지 `guideCellText(field, t, g, myQ.value)`로 바뀌어 `[object Object]`가 복사되던 문제를 `guideText(field, t, g, myQ.value)`로 바로잡음.
+- 「이 사례로 내 탐구 시작」: 같은 사례로 만든 탐구노트가 있으면 새로 만들지 않고 이어 씀(`links.explore = guidebook-<연번>`으로 `findBy`).
+- 탐구노트 카드에 탐구 도움서 앵커 8개(공통 기준 `HELP`)를 「막히면 탐구 도움서에서 바로 찾기」로 연결.
+- 진로 실험실 연결 문구를 「학교 안 미니 실험으로 먼저 해 보기」로 바꿔 본격 설계(길잡이)와 구분.
+- 공통 기준 `inquiry-standard.js` 1.5 반영(SITES에 좋은 기록 문서 `record` 추가). 버전 표기를 v2.9로 통일.
+### v2.8 (2026-10-28)
 - 사례 분류 데이터 재생성, 학년 필터, 대학명 별칭, 인라인 탐구 질문 및 공통 노트 연계, 다크 모드 개선.
 - 가이드북 원문 재게시 권한 확인 전 공개 GitHub Pages 배포 금지.
 - v2.7: 출처 균형 검색 및 학년도·대학 필터, 연계 사례 39건, 관련 도서 탐색.
 - v2.6: 원문 775건·연계 39건 데이터 최초 통합.
-
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 프로젝트 목적
 창원경일고 학생이 희망 진로·관심 분야에서 출발해 탐구 주제 → 질문 → 조사·자료 → 활동 → 결과 정리 → 보고서·발표 → 후속 탐구를 스스로 설계하도록 돕는 웹도구. AI가 탐구를 대신 완성하는 도구가 아니라 선택·질문·검증을 돕는 코치다. 기능 수보다 정확성, 자기주도성, 사용 편의성, 개인정보 보호를 우선한다. UI 작업 전에는 `DESIGN.md`, 변경 이력은 `README.md`를 먼저 읽는다.
