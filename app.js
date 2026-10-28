@@ -271,7 +271,7 @@ function aiCaseItem(a) {
 }
 
 // 원문 셀을 절대 변경하지 않고 화면에서만 서식화합니다.
-function guideText(v){ return esc(String(v == null ? '' : v)); }
+function guideCellText(v){ return esc(String(v == null ? '' : v)); }
 function universityKey(name){return norm(String(name||'').replace(/한국외국어대학교?|한국외대/g,'한국외대').replace(/한양대\s*\(?\s*에리카\s*\)?|한양대\s*\(?\s*ERICA\s*\)?/gi,'한양대ERICA'));}
 function guideSearchText(c){ return c.raw.join(' '); }
 function schoolCourseTags(value){
@@ -281,9 +281,9 @@ function schoolCourseTags(value){
  }).join(' ');
 }
 function guideCaseItem(c){
-  const r=c.raw, v=i=>guideText(r[i]), kind=c.kind;
+  const r=c.raw, v=i=>guideCellText(r[i]), kind=c.kind;
   const kindHtml=kind ? kyeolTag({kyeol:kind}) : '<span class="tag">탐구 유형 미분류</span>';
-  const part=(label,val)=>String(val||'').trim() ? `<p><b>${label}</b> <span class="raw">${guideText(val)}</span></p>` : '';
+  const part=(label,val)=>String(val||'').trim() ? `<p><b>${label}</b> <span class="raw">${guideCellText(val)}</span></p>` : '';
   return `<li><span class="t">${v(8)}</span><div class="tags">${kindHtml}<span class="tag source">● 4개년 가이드북 수록 사례</span></div>
    <span class="m">${v(2)} · ${v(1)}학년도 · ${v(4)} · ${v(5)} · ${v(6)} · ${v(7)}</span>
    <div class="tags">${schoolCourseTags(r[12])}</div>
@@ -304,8 +304,8 @@ function relatedLink(c, field, k){
  const q=norm(k||'');
  return !field.generic ? c.fields.includes(field.id) : Boolean(q)&&norm(c.raw.join(' ')).includes(q);
 }
-function linkItem(x){const r=x.raw;return `<article class="guide-link-item"><b>${guideText(r[1])} · ${guideText(r[2])} (${guideText(r[0])}학년도)</b>
- <div class="guide-steps">${[3,4,5].map((n,i)=>`<div><b>${['관심 출발','교과 연계 탐구','심화·후속 탐구'][i]} · 원문 ${i+1}단계</b><p class="raw">${guideText(r[n])||'원문에 기재되지 않음'}</p></div>`).join('')}</div><p><b>연계 방식(원문):</b> ${guideText(r[6])}</p>
+function linkItem(x){const r=x.raw;return `<article class="guide-link-item"><b>${guideCellText(r[1])} · ${guideCellText(r[2])} (${guideCellText(r[0])}학년도)</b>
+ <div class="guide-steps">${[3,4,5].map((n,i)=>`<div><b>${['관심 출발','교과 연계 탐구','심화·후속 탐구'][i]} · 원문 ${i+1}단계</b><p class="raw">${guideCellText(r[n])||'원문에 기재되지 않음'}</p></div>`).join('')}</div><p><b>연계 방식(원문):</b> ${guideCellText(r[6])}</p>
  <p class="hint">세 단계가 반드시 고1·고2·고3을 뜻하는 것은 아닙니다. 실제 학년은 원문에서 확인하세요.</p></article>`;}
 function guideLinksPanel(field,k){
  return `<section class="card guide-links" id="guideLinks"><details id="guideLinksToggle"><summary><b>📈 선배의 학년별 탐구 흐름 39건 보기</b></summary>
@@ -378,7 +378,7 @@ function bindCasePanel(field,k){
  document.getElementById('caseAll').addEventListener('change',e=>{st.all=e.target.checked;st.limit=12;draw();});
  document.getElementById('caseMore').addEventListener('click',()=>{st.limit+=12;draw();});
  const drawBooks=()=>{const a=GUIDE_CASES.filter(c=>c.raw[9].trim()&&c.raw[9].trim()!=='-'&&(st.all||relatedGuide(c,field,k))&&(!st.bookQ||norm([c.raw[9],c.raw[4],c.raw[8]].join(' ')).includes(norm(st.bookQ))));
- document.getElementById('bookList').innerHTML=a.slice(0,st.bookLimit).map(c=>`<p>📚 <b>${guideText(c.raw[9])}</b> · ${guideText(c.raw[4])} · ${guideText(c.raw[8])}</p>`).join('')||'<p>검색 결과가 없습니다.</p>';
+ document.getElementById('bookList').innerHTML=a.slice(0,st.bookLimit).map(c=>`<p>📚 <b>${guideCellText(c.raw[9])}</b> · ${guideCellText(c.raw[4])} · ${guideCellText(c.raw[8])}</p>`).join('')||'<p>검색 결과가 없습니다.</p>';
  document.getElementById('bookMore').hidden=a.length<=st.bookLimit;};
  document.getElementById('bookSearch').addEventListener('input',e=>{st.bookQ=e.target.value;st.bookLimit=12;drawBooks()});
  document.getElementById('bookMore').addEventListener('click',()=>{st.bookLimit+=12;drawBooks()});
@@ -797,7 +797,7 @@ function renderGuide(s, field, t) {
     render();
     toast('진로 탐구 길잡이 기록을 지웠어요');
   });
-  app.querySelector('[data-copyall]').addEventListener('click', () => copyText(guideText(field, t, g, myQ.value)));
+  app.querySelector('[data-copyall]').addEventListener('click', () => copyText(guideCellText(field, t, g, myQ.value)));
   app.querySelector('[data-plan]').addEventListener('click', () => printOnePagePlan(field, t, g, myQ.value));
   const recordBtn=app.querySelector('[data-recordcopy]');
   if(recordBtn) recordBtn.addEventListener('click',()=>{
