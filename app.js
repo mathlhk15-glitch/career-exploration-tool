@@ -1,4 +1,4 @@
-// 진로 탐구 길잡이 v2.5 - 화면·검색·저장·인쇄 로직
+// 진로 탐구 길잡이 v2.8 - 화면·검색·저장·인쇄 로직
 /* 목록에 없는 진로를 위한 범용 탐구 틀 */
 function buildGenericField(c) {
   const field = {
@@ -270,65 +270,127 @@ function aiCaseItem(a) {
     <span class="m">관심 키워드: ${esc(a[2])} · 권장 방법: ${esc(a[3])}</span></li>`;
 }
 
-function casePanel(field, k) {
-  const { map, ai } = fieldCases(field, k);
-  return `
-    <section class="card" id="casePanel">
-      <h2>🗺️ 선배들의 탐구 사례</h2>
-      <p class="lead">「모두의 학과별 탐구 지도」(대학 공개 자료 기반, 현재 ${MAP_CASES.length}건)와 탐구 아이디어 예시 ${AI_CASES.length}건 가운데 ${field.generic ? '입력한 진로와 관련된' : '이 분야와 연결된'} 사례예요. 출처 확인·추정 사례 ${map.length}건, 탐구 아이디어 ${ai.length}건.</p>
-      ${kyeolSummary(map)}
-      <p class="notice k mt-s">💬 <b>활용 요령</b> — ${esc(MAP_TIP)}</p><p class="hint"><b>검증 수준:</b> ● 출처 확인 사례 = 대학 공개 자료에 실린 사례 · ◐ 학과 연결 추정 = 탐구 내용은 확인됐지만 학과 연결은 추정 · ○ 탐구 아이디어 예시 = 수행 전 출처·방법·안전 확인 필요</p>
-      <p class="notice warn mt-s"><b>⚠️ 읽기 전에</b> 이 주제를 하면 합격한다는 뜻이 아니에요. 가이드북 문장을 옮겨 와서 다듬어지지 않은 문장이 섞여 있고, 학과 연결 일부는 추정이에요. 주제를 그대로 따라 하지 말고 질문 구조·방법·탐구의 결을 참고해 내 탐구로 바꾸세요.</p>
-      <div class="case-tools no-print">
-        <div class="chips" id="caseKyeol">
-          <button class="chip on" type="button" data-cf="" aria-pressed="true">전체</button>
-          ${KEYS.map(x => `<button class="chip" type="button" data-cf="${x}" aria-pressed="false">${KYEOL[x].icon} ${esc(KYEOL[x].name)}</button>`).join('')}
-        </div>
-        <div class="chips" id="caseSrc">
-          <button class="chip on" type="button" data-cs="map" aria-pressed="true">합격생 사례</button>
-          <button class="chip on" type="button" data-cs="ai" aria-pressed="true">탐구 아이디어 예시</button>
-        </div>
-        <label for="caseSearch" class="sr">사례 검색</label>
-        <input id="caseSearch" type="search" placeholder="사례 검색 (예: 배터리, 설문, 영상)">
-        <label><input id="caseAll" type="checkbox"> 모든 분야의 사례에서 찾기</label>
-      </div>
-      <p class="hint" id="caseCount"></p>
-      <ul class="case-list" id="caseList"></ul>
-      <div class="row mt-s no-print"><button class="btn small" type="button" id="caseMore">더 보기</button></div>
-    </section>`;
+// 원문 셀을 절대 변경하지 않고 화면에서만 서식화합니다.
+function guideText(v){ return esc(String(v == null ? '' : v)); }
+function universityKey(name){return norm(String(name||'').replace(/한국외국어대학교?|한국외대/g,'한국외대').replace(/한양대\s*\(?\s*에리카\s*\)?|한양대\s*\(?\s*ERICA\s*\)?/gi,'한양대ERICA'));}
+function guideSearchText(c){ return c.raw.join(' '); }
+function schoolCourseTags(value){
+ const names=String(value||'').split(/[\n,;/·]+/).map(x=>x.trim()).filter(Boolean);
+ return names.map(n=>{const years=[1,2,3].filter(g=>(SCHOOL[g]||[]).some(course=>course===n || course.replace(/[12·\s]/g,'')===n.replace(/[12·\s]/g,'')));
+  return `<span class="tag ${years.length?'school-available':''}">${esc(n)}${years.length?' · 우리 학교 '+years.join('·')+'학년 편제':' · 개설 여부 확인'}</span>`;
+ }).join(' ');
 }
-
-function bindCasePanel(field, k) {
-  const st = { kyeol: '', src: { map: true, ai: true }, q: '', all: false, limit: 12 };
-  const listEl = document.getElementById('caseList');
-  const draw = () => {
-    const base = st.all ? { map: MAP_CASES, ai: AI_CASES } : fieldCases(field, k);
-    const q = norm(st.q);
-    const hit = (text) => !q || norm(text).includes(q);
-    const map = st.src.map ? base.map.filter(c => (!st.kyeol || c[7] === st.kyeol) && hit(c[0] + c[4] + c[6])) : [];
-    const ai = st.src.ai ? base.ai.filter(a => (!st.kyeol || a[4] === st.kyeol) && hit(a[0] + a[2] + a[3])) : [];
-    const items = map.map(mapCaseItem).concat(ai.map(aiCaseItem));
-    listEl.innerHTML = items.slice(0, st.limit).join('') || '<li>조건에 맞는 사례가 없어요. 검색어를 바꾸거나 “모든 분야”를 켜 보세요.</li>';
-    document.getElementById('caseCount').textContent = `${items.length}건 중 ${Math.min(st.limit, items.length)}건 표시`;
-    document.getElementById('caseMore').hidden = items.length <= st.limit;
-  };
-  document.getElementById('caseKyeol').addEventListener('click', e => {
-    const b = e.target.closest('[data-cf]'); if (!b) return;
-    st.kyeol = b.dataset.cf; st.limit = 12;
-    b.parentNode.querySelectorAll('.chip').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
-    draw();
-  });
-  document.getElementById('caseSrc').addEventListener('click', e => {
-    const b = e.target.closest('[data-cs]'); if (!b) return;
-    st.src[b.dataset.cs] = !st.src[b.dataset.cs]; st.limit = 12;
-    b.classList.toggle('on', st.src[b.dataset.cs]);
-    b.setAttribute('aria-pressed', String(st.src[b.dataset.cs]));
-    draw();
-  });
-  document.getElementById('caseSearch').addEventListener('input', e => { st.q = e.target.value; st.limit = 12; draw(); });
-  document.getElementById('caseAll').addEventListener('change', e => { st.all = e.target.checked; st.limit = 12; draw(); });
-  document.getElementById('caseMore').addEventListener('click', () => { st.limit += 12; draw(); });
-  draw();
+function guideCaseItem(c){
+  const r=c.raw, v=i=>guideText(r[i]), kind=c.kind;
+  const kindHtml=kind ? kyeolTag({kyeol:kind}) : '<span class="tag">탐구 유형 미분류</span>';
+  const part=(label,val)=>String(val||'').trim() ? `<p><b>${label}</b> <span class="raw">${guideText(val)}</span></p>` : '';
+  return `<li><span class="t">${v(8)}</span><div class="tags">${kindHtml}<span class="tag source">● 4개년 가이드북 수록 사례</span></div>
+   <span class="m">${v(2)} · ${v(1)}학년도 · ${v(4)} · ${v(5)} · ${v(6)} · ${v(7)}</span>
+   <div class="tags">${schoolCourseTags(r[12])}</div>
+   <details class="guide-start-box"><summary>📝 이 사례를 참고해 내 탐구 시작</summary><label for="guide-question-${v(0)}">내가 새롭게 만든 탐구 질문</label><textarea id="guide-question-${v(0)}" rows="3" placeholder="원문을 복사하지 말고, 내 경험과 관심을 반영한 질문을 적어 보세요."></textarea><button class="btn small guide-start" type="button" data-start-guide="${v(0)}">탐구노트에 저장</button></details>
+   <details class="guide-detail"><summary>원문 전체 15개 항목 보기</summary>
+    ${part('연번:',r[0])}${part('학년도:',r[1])}${part('대학:',r[2])}${part('계열:',r[3])}${part('학과:',r[4])}${part('학생 학년:',r[5])}${part('활동 구분:',r[6])}${part('과목·활동 원문:',r[7])}${part('탐구 주제:',r[8])}
+    ${part('관련 도서:',r[9])}${part('2022 개정 교과:',r[12])}${part('2022 개정 단원·개념:',r[13])}
+    ${part('탐구 방법·절차 원문:',r[14])}
+    <details><summary>2015 개정 교육과정 원문 보기</summary>${part('2015 교과:',r[10])}${part('2015 단원:',r[11])}</details>
+    <p class="hint">분야·탐구유형은 프로그램에서 자동 분류한 참고 정보이며, 해당 대학의 권장 주제나 합격 기준이 아닙니다.</p>
+   </details></li>`;
+}
+function relatedGuide(c, field, k){
+ const q=norm(k||'');
+ return !field.generic ? c.fields.includes(field.id) : Boolean(q)&&norm(c.raw.slice(2).join(' ')).includes(q);
+}
+function relatedLink(c, field, k){
+ const q=norm(k||'');
+ return !field.generic ? c.fields.includes(field.id) : Boolean(q)&&norm(c.raw.join(' ')).includes(q);
+}
+function linkItem(x){const r=x.raw;return `<article class="guide-link-item"><b>${guideText(r[1])} · ${guideText(r[2])} (${guideText(r[0])}학년도)</b>
+ <div class="guide-steps">${[3,4,5].map((n,i)=>`<div><b>${['관심 출발','교과 연계 탐구','심화·후속 탐구'][i]} · 원문 ${i+1}단계</b><p class="raw">${guideText(r[n])||'원문에 기재되지 않음'}</p></div>`).join('')}</div><p><b>연계 방식(원문):</b> ${guideText(r[6])}</p>
+ <p class="hint">세 단계가 반드시 고1·고2·고3을 뜻하는 것은 아닙니다. 실제 학년은 원문에서 확인하세요.</p></article>`;}
+function guideLinksPanel(field,k){
+ return `<section class="card guide-links" id="guideLinks"><details id="guideLinksToggle"><summary><b>📈 선배의 학년별 탐구 흐름 39건 보기</b></summary>
+ <p class="lead">관심 출발 → 교과 연계 → 심화·후속 탐구. 원문 단계는 실제 학년과 다를 수 있습니다.</p>
+ <div class="row no-print"><label><input type="checkbox" id="linksAll"> 모든 분야 보기</label><label for="linksSearch">학과·활동 검색</label><input id="linksSearch" type="search" placeholder="예: 건축, 바이오"></div>
+ <p class="hint" id="linksCount"></p><div id="linksList"></div><button class="btn small no-print" id="linksMore" type="button">더 보기</button></details></section>`;
+}
+function bindGuideLinks(field,k){
+ const st={all:false,q:'',limit:6};const draw=()=>{
+  const a=GUIDE_LINKS.filter(x=>(st.all||relatedLink(x,field,k))&&(!st.q||norm(x.raw.join(' ')).includes(norm(st.q))));
+  document.getElementById('linksCount').textContent=`${a.length}건 중 ${Math.min(st.limit,a.length)}건 표시`;
+  document.getElementById('linksList').innerHTML=a.slice(0,st.limit).map(linkItem).join('')||'<p>관련 사례가 없습니다. 모든 분야 보기를 선택해 보세요.</p>';
+  document.getElementById('linksMore').hidden=st.limit>=a.length;
+ };document.getElementById('linksAll').addEventListener('change',e=>{st.all=e.target.checked;st.limit=6;draw()});
+ document.getElementById('linksSearch').addEventListener('input',e=>{st.q=e.target.value;st.limit=6;draw()});
+ document.getElementById('linksMore').addEventListener('click',()=>{st.limit+=6;draw()});draw();
+}
+function casePanel(field,k){
+ const {map,ai}=fieldCases(field,k);
+ const guides=GUIDE_CASES.filter(c=>relatedGuide(c,field,k));
+ const schools=[...new Set(GUIDE_CASES.map(c=>c.raw[2]).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
+ return `<section class="card" id="casePanel"><h2>🗺️ 탐구 사례 검색·활용</h2>
+ <p class="lead">관심 분야: 신규 가이드북 ${guides.length}건 · 기존 탐구 지도 ${map.length}건 · AI 아이디어 ${ai.length}건. 전체 자료는 출처별로 구분됩니다.</p>
+ ${kyeolSummary(map)}<p class="notice k mt-s">💬 ${esc(MAP_TIP)}</p>
+ <p class="notice warn mt-s"><b>출처·저작권 안내</b> 대학 가이드북 사례는 대학의 권장 주제나 합격 보장 기준이 아닙니다. 원문 사례를 그대로 따라 하기보다 자신의 질문·자료·방법을 구성해 보세요.</p>
+ <div class="case-tools no-print">
+ <div class="chips" id="caseKyeol"><button class="chip on" type="button" data-cf="" aria-pressed="true">전체 유형</button>${KEYS.map(x=>`<button class="chip" type="button" data-cf="${x}" aria-pressed="false">${KYEOL[x].icon} ${esc(KYEOL[x].name)}</button>`).join('')}<button class="chip" type="button" data-cf="other" aria-pressed="false">기타·미분류</button></div>
+ <div class="chips" id="caseSrc"><button class="chip on" type="button" data-cs="guide" aria-pressed="true">가이드북 775건</button><button class="chip on" type="button" data-cs="map" aria-pressed="true">기존 지도 ${MAP_CASES.length}건</button><button class="chip on" type="button" data-cs="ai" aria-pressed="true">탐구 아이디어</button></div>
+ <div class="chips" id="guideActivity"><button class="chip on" data-ga="" aria-pressed="true" type="button">교과·창체 전체</button><button class="chip" data-ga="교과" aria-pressed="false" type="button">교과</button><button class="chip" data-ga="창체" aria-pressed="false" type="button">창체</button></div>
+ <div class="case-filter-grid"><label>🏫 대학<select id="caseUniversity"><option value="">전체 대학</option>${schools.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select></label>
+ <label>🎒 학년<select id="caseGrade"><option value="">전체 학년(미표기 포함)</option><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option><option value="-">학년 미표기</option></select></label><label>📅 학년도<select id="caseYear"><option value="">전체 연도</option>${['2027','2026','2025','2024'].map(x=>`<option value="${x}">${x}학년도</option>`).join('')}</select></label>
+ <label>정렬<select id="caseSort"><option value="mix">출처 균형</option><option value="new">최신 학년도</option><option value="guide">가이드북 우선</option><option value="map">기존 지도 우선</option></select></label></div>
+ <label for="caseSearch" class="sr">사례 검색</label><input id="caseSearch" type="search" placeholder="탐구 주제·학과·도서·교과·단원 검색">
+ <label><input id="caseAll" type="checkbox"> 모든 분야의 사례에서 찾기</label>
+ </div><p class="hint">교과·창체 및 대학·학년도 필터는 해당 정보가 있는 가이드북 사례에 적용됩니다. 원자료에 없는 정보는 만들어 넣지 않습니다.</p>
+ <p class="hint" id="caseCount"></p><ul class="case-list" id="caseList"></ul>
+ <div class="row mt-s no-print"><button class="btn small" type="button" id="caseMore">더 보기</button></div>
+ <details class="mt"><summary><b>📚 탐구 연계 도서 모아보기</b></summary><p class="hint">원문에 도서가 적힌 사례를 분야별로 검색합니다.</p><input id="bookSearch" type="search" placeholder="도서명·학과 검색"><div id="bookList"></div><button class="btn small" type="button" id="bookMore">더 보기</button></details>
+ </section>`;
+}
+function bindCasePanel(field,k){
+ const st={kyeol:'',src:{guide:true,map:true,ai:true},activity:'',q:'',all:false,limit:12,uni:'',year:'',grade:'',sort:'mix',bookQ:'',bookLimit:12};
+ const listEl=document.getElementById('caseList');const hit=text=>!st.q||norm(text).includes(norm(st.q));
+ const matched=()=>{
+  const base=st.all?{map:MAP_CASES,ai:AI_CASES}:fieldCases(field,k);
+  const guide=st.src.guide?GUIDE_CASES.filter(c=>(st.all||relatedGuide(c,field,k))&&(!st.kyeol||(st.kyeol==='other'?!c.kind:c.kind===st.kyeol))&&(!st.activity||c.raw[6].includes(st.activity))&&(!st.uni||universityKey(c.raw[2])===universityKey(st.uni))&&(!st.year||c.raw[1]===st.year)&&(!st.grade||String(c.raw[5]).includes(st.grade)||(st.grade==='-'&&(!c.raw[5]||c.raw[5]==='-')))&&hit(guideSearchText(c))):[];
+  const map=st.src.map?base.map.filter(c=>(!st.kyeol||(st.kyeol==='other'?!c[7]:c[7]===st.kyeol))&&(!st.uni||universityKey(c[1])===universityKey(st.uni))&&(!st.year||c[2]===st.year)&&!st.grade&&hit(c.join(' '))):[];
+  const ai=st.src.ai?base.ai.filter(c=>(!st.kyeol||(st.kyeol==='other'?!c[4]:c[4]===st.kyeol))&&!st.uni&&!st.year&&!st.grade&&hit(c.join(' '))):[];
+  const normalizeTitle=x=>norm(x).replace(/[^가-힣a-z0-9]/g,'').slice(0,70);
+  // 동일 대학/연도/거의 같은 제목에 한해 기존 목록만 화면에서 중복 제거. 원자료는 보존.
+  const guideTitles=new Set(guide.map(c=>[c.raw[2],c.raw[1],normalizeTitle(c.raw[8])].join('|')));
+  const uniqueMap=map.filter(c=>!guideTitles.has([c[1],c[2],normalizeTitle(c[0])].join('|')));
+  const g=guide.map(c=>({html:guideCaseItem(c),year:Number(c.raw[1]),src:'guide'}));
+  const m=uniqueMap.map(c=>({html:mapCaseItem(c),year:Number(c[2]),src:'map'}));
+  const aiItems=ai.map(c=>({html:aiCaseItem(c),year:0,src:'ai'}));
+  if(st.sort==='new')return [...g,...m,...aiItems].sort((a,b)=>b.year-a.year);
+  if(st.sort==='guide')return [...g,...m,...aiItems];if(st.sort==='map')return [...m,...g,...aiItems];
+  // 작은 화면의 첫 페이지에서도 세 출처가 모두 보이도록 라운드로빈 배치
+  const pools=[g,m,aiItems],out=[];let i=0;
+  while(pools.some(x=>x.length)){const pool=pools[i%3];if(pool.length)out.push(pool.shift());i++;}
+  return out;
+ };
+ const draw=()=>{const items=matched();listEl.innerHTML=items.slice(0,st.limit).map(x=>x.html).join('')||'<li>조건에 맞는 사례가 없습니다. 필터나 검색어를 바꿔 보세요.</li>';
+ document.getElementById('caseCount').textContent=`${items.length}건 중 ${Math.min(st.limit,items.length)}건 표시`;
+ document.getElementById('caseMore').hidden=items.length<=st.limit;};
+ function oneChip(id,attr,fn){document.getElementById(id).addEventListener('click',e=>{const b=e.target.closest('['+attr+']');if(!b)return;fn(b.dataset[attr.slice(5)]);st.limit=12;b.parentNode.querySelectorAll('button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',String(x===b));});draw();});}
+ oneChip('caseKyeol','data-cf',v=>st.kyeol=v);oneChip('guideActivity','data-ga',v=>st.activity=v);
+ document.getElementById('caseSrc').addEventListener('click',e=>{const b=e.target.closest('[data-cs]');if(!b)return;st.src[b.dataset.cs]=!st.src[b.dataset.cs];b.classList.toggle('on',st.src[b.dataset.cs]);b.setAttribute('aria-pressed',String(st.src[b.dataset.cs]));st.limit=12;draw();});
+ [['caseSearch','q','input'],['caseUniversity','uni','change'],['caseYear','year','change'],['caseGrade','grade','change'],['caseSort','sort','change']].forEach(([id,key,ev])=>document.getElementById(id).addEventListener(ev,e=>{st[key]=e.target.value;st.limit=12;draw();}));
+ document.getElementById('caseAll').addEventListener('change',e=>{st.all=e.target.checked;st.limit=12;draw();});
+ document.getElementById('caseMore').addEventListener('click',()=>{st.limit+=12;draw();});
+ const drawBooks=()=>{const a=GUIDE_CASES.filter(c=>c.raw[9].trim()&&c.raw[9].trim()!=='-'&&(st.all||relatedGuide(c,field,k))&&(!st.bookQ||norm([c.raw[9],c.raw[4],c.raw[8]].join(' ')).includes(norm(st.bookQ))));
+ document.getElementById('bookList').innerHTML=a.slice(0,st.bookLimit).map(c=>`<p>📚 <b>${guideText(c.raw[9])}</b> · ${guideText(c.raw[4])} · ${guideText(c.raw[8])}</p>`).join('')||'<p>검색 결과가 없습니다.</p>';
+ document.getElementById('bookMore').hidden=a.length<=st.bookLimit;};
+ document.getElementById('bookSearch').addEventListener('input',e=>{st.bookQ=e.target.value;st.bookLimit=12;drawBooks()});
+ document.getElementById('bookMore').addEventListener('click',()=>{st.bookLimit+=12;drawBooks()});
+ document.getElementById('caseList').addEventListener('click',e=>{const b=e.target.closest('[data-start-guide]');if(!b)return;
+ const c=GUIDE_CASES.find(x=>x.raw[0]===b.dataset.startGuide);if(!c)return;
+ const original=c.raw[8];const textarea=b.closest('.guide-start-box')?.querySelector('textarea');const question=textarea?.value.trim()||'';
+ if(!question){toast('자신만의 탐구 질문을 먼저 입력해 주세요.');textarea?.focus();return;}
+ if(!window.KNotes||typeof window.KNotes.create!=='function'){toast('탐구노트 모듈을 불러오지 못했습니다.');return;}
+ try{const n=window.KNotes.create({title:question,topic:original,question:question,interest:c.raw[4],field:field.generic?'':field.id,subject:c.raw[12],concept:c.raw[13],method:c.raw[14],start:{from:'guidebook',text:'참고 사례 '+c.raw[0]+' / '+c.raw[2]+' / '+c.raw[1]+'학년도 / '+original},stage:'start',links:{explore:'guidebook-'+c.raw[0]}},'explore');
+ window.KNotes.setActive(n.id);toast('탐구노트에 저장했습니다. 성장 허브의 현재 탐구에서 이어갈 수 있어요.');}
+ catch(err){toast('탐구노트를 저장할 수 없습니다. 브라우저의 저장 공간과 모드를 확인하세요.');}
+ });draw();drawBooks();
 }
 
 /* =========================================================
@@ -341,6 +403,7 @@ function renderHome() {
     <section class="hero">
       <h1>내 진로와 연결된<br>탐구 활동을 시작해 볼까요?</h1>
       <p>희망 진로를 입력하면 2022 개정 교육과정 전체 과목과 연결된 탐구 주제부터 질문 만들기, 활동 방법, 보고서 쓰기까지 차근차근 안내해 줄게요.</p>
+      <div class="row no-print"><button class="btn small" id="quickCases" type="button">🔎 4개년 탐구 사례 바로 검색</button></div>
       <div class="flow">
         <div><b>① 진로 입력</b>희망 진로나 관심 분야를 써요</div>
         <div><b>② 주제 고르기</b>내 학년에 맞는 주제를 골라요</div>
@@ -462,8 +525,10 @@ function renderTopics(s, field) {
     <p class="notice">💡 ${esc(gd.focus)}</p>
     ${rec.length ? `<h2 class="group-title">${gd.label}에게 추천하는 주제</h2>${rec.map(t => card(t, true)).join('')}` : ''}
     ${other.length ? `<h2 class="group-title">도전해 볼 수 있는 다른 주제</h2>${other.map(t => card(t, false)).join('')}` : ''}
-    ${casePanel(field, s.k)}`;
+    ${casePanel(field, s.k)}
+    ${guideLinksPanel(field, s.k)}`;
   bindCasePanel(field, s.k);
+  bindGuideLinks(field, s.k);
 }
 
 function storageKey(s) { return 'cet-v2:' + [s.f, s.t, s.g, s.f === 'gen' ? s.k : ''].join(':'); }
@@ -663,6 +728,7 @@ function renderGuide(s, field, t) {
 
     <section class="card section" id="s7">
       <h2><span class="num">7</span>후속 탐구 아이디어</h2>
+      <details class="mt-s"><summary>📈 비슷한 3단계 탐구 흐름 사례 보기</summary><div>${GUIDE_LINKS.filter(x=>relatedLink(x,field,s.k)).slice(0,2).map(linkItem).join('')||'<p>이 분야의 연결 사례는 아직 없습니다.</p>'}</div></details>
       <p class="why">탐구는 한 번으로 끝나지 않아요. 결과에서 생긴 새로운 궁금증을 다음 탐구로 이어 가세요.</p>
       <h3>이어서 해 볼 탐구</h3>
       <ul>${t.next.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
@@ -861,7 +927,8 @@ document.addEventListener('click', e => {
   if (!el) return;
   const s = readState();
   const d = el.dataset;
-  if ('home' in d) go({});
+  if (el.id==='quickCases') { go({g:'1', f:'gen', k:'가이드북 사례'}); const box=document.getElementById('caseAll');if(box){box.checked=true;box.dispatchEvent(new Event('change',{bubbles:true}));document.getElementById('casePanel')?.scrollIntoView({block:'start'});} }
+  else if ('home' in d) go({});
   else if (d.grade) go({ g: d.grade });
   else if (d.try) { document.getElementById('careerInput').value = d.try; search(s.g, d.try); }
   else if (d.field) go({ g: s.g, f: d.field, k: s.k });

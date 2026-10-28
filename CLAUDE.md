@@ -1,3 +1,9 @@
+## v2.8 추가 변경 이력 (2026-10-28)
+- 사례 분류 데이터 재생성, 학년 필터, 대학명 별칭, 인라인 탐구 질문 및 공통 노트 연계, 다크 모드 개선.
+- 가이드북 원문 재게시 권한 확인 전 공개 GitHub Pages 배포 금지.
+- v2.7: 출처 균형 검색 및 학년도·대학 필터, 연계 사례 39건, 관련 도서 탐색.
+- v2.6: 원문 775건·연계 39건 데이터 최초 통합.
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -56,3 +62,14 @@ python -m http.server 8123 --bind 127.0.0.1
 - `inquiry-standard.js`·`inquiry-notes.js`는 gyeongil-growth-hub 원본의 복사본이다. 여기서 직접 고치지 말고 원본을 고친 뒤 네 저장소에 같은 파일을 넣는다.
 - `kyungil-link.js`는 `readState`·`getField`·`storageKey`·`search`·`GRADES`를 읽기만 한다. 이 이름을 바꾸면 연결 코드도 함께 고친다.
 - 공통 탐구노트 키: `kyungil.inquiryNotes.v1`(목록), `kyungil.activeNote`(sessionStorage, 지금 이어 쓰는 노트).
+
+## v2.7 파일 구조 보완
+- 기존 `cases.js`의 `MAP_CASES` 원문은 유지한다. `guide-cases.js`를 `cases.js` 다음, `app.js` 전에 로드한다.
+- 4개년 엑셀 원문 775건(15열) 및 연계 사례 39건(7열)을 모두 보존한다. 분야와 탐구 결은 화면 편의를 위한 자동 추정이며 원문 근거로 표시하지 않는다.
+- 재게시 권한이 확인되기 전에는 외부 공개 배포하지 않는다.
+
+
+## v2.7 배포·기능 주의
+- 출처별 균형 정렬, 대학·학년도 필터, 검색 및 자동 분류 안내를 보완했습니다.
+- 가이드북 원문 전체를 포함하므로 권리 확인 전 공개 GitHub Pages에 게시하지 마세요.
+- 기존 MAP_CASES와 AI_CASES의 데이터 값은 변경하지 않았습니다.
